@@ -47,8 +47,16 @@ public class ArchiveRapport {
     @Column(nullable=false)
     private String typeFichier;
 
+    @Column(nullable = false)
     private LocalDateTime dateArchivage;
 
     @Column(columnDefinition = "TEXT")
     private String commentaireArchivage;
+
+    @PrePersist
+    public void prePersist() {
+        if (dateArchivage == null) {
+            dateArchivage = LocalDateTime.now();
+        }
+    }
 }

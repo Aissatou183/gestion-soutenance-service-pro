@@ -1,6 +1,7 @@
 package com.uasz.gestion_soutenance_service.security;
 
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,10 +20,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -33,19 +35,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = authHeader.substring(7);
-            String email = jwtService.extractUsername(token);
+            String email = jwtService.extractEmail(token);
             String role = jwtService.extractRole(token);
 
-            if (email != null && role != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (Exception ignored) {
+
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

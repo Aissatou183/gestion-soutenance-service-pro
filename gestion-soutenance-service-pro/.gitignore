@@ -1,10 +1,4 @@
-# Java
 target/
-*.class
-
-# IDE
 .idea/
-.vscode/
-
-# Logs
 *.log
+uploads/

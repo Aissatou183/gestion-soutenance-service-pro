@@ -1,6 +1,6 @@
 package com.uasz.gestion_soutenance_service.client;
 
-import com.uasz.gestion_soutenance_service.dto.EncadrementResponse;
+import com.uasz.gestion_soutenance_service.dto.UtilisateurResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -9,14 +9,14 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
-public class EncadrementClient {
+public class UtilisateurClient {
 
     private final RestTemplate restTemplate;
 
-    @Value("${services.encadrement.url}")
-    private String encadrementUrl;
+    @Value("${services.utilisateur.url}")
+    private String utilisateurUrl;
 
-    public EncadrementResponse trouverParId(Long id, String token) {
+    public UtilisateurResponse trouverParId(Long id, String token) {
         HttpHeaders headers = new HttpHeaders();
 
         if (token != null && !token.isBlank()) {
@@ -25,14 +25,23 @@ public class EncadrementClient {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<EncadrementResponse> response =
+        ResponseEntity<UtilisateurResponse> response =
                 restTemplate.exchange(
-                        encadrementUrl + "/encadrements/" + id,
+                        utilisateurUrl + "/utilisateurs/" + id,
                         HttpMethod.GET,
                         entity,
-                        EncadrementResponse.class
+                        UtilisateurResponse.class
                 );
 
         return response.getBody();
+    }
+
+    public String nomComplet(UtilisateurResponse u) {
+        if (u == null) return "";
+
+        String prenom = u.getPrenom() == null ? "" : u.getPrenom();
+        String nom = u.getNom() == null ? "" : u.getNom();
+
+        return (prenom + " " + nom).trim();
     }
 }

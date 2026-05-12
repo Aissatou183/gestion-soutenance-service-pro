@@ -2,12 +2,13 @@ package com.uasz.gestion_soutenance_service.config;
 
 import com.uasz.gestion_soutenance_service.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.*;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -26,27 +27,43 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
+
                     config.setAllowedOrigins(List.of(
-                            "http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
-                            "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://127.0.0.1:5175"
+                            "http://localhost:5173",
+                            "http://localhost:5174",
+                            "http://localhost:5175",
+                            "http://127.0.0.1:5173",
+                            "http://127.0.0.1:5174",
+                            "http://127.0.0.1:5175"
                     ));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+                    config.setAllowedMethods(List.of(
+                            "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+                    ));
+
                     config.setAllowedHeaders(List.of("*"));
-                    config.setExposedHeaders(List.of("Authorization"));
+                    config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
                     config.setAllowCredentials(true);
+
                     return config;
                 }))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/soutenances").hasRole("ADMINISTRATEUR")
-                        .requestMatchers(HttpMethod.PUT, "/api/soutenances/**").hasRole("ADMINISTRATEUR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/soutenances/**").hasRole("ADMINISTRATEUR")
-                        .requestMatchers(HttpMethod.POST, "/api/archives/**").hasRole("ADMINISTRATEUR")
+                        .requestMatchers(HttpMethod.POST, "/api/soutenances/**")
+                        .hasRole("ADMINISTRATEUR")
 
-                        .requestMatchers(HttpMethod.GET, "/api/soutenances/**").hasAnyRole("ADMINISTRATEUR", "ENSEIGNANT", "ETUDIANT")
-                        .requestMatchers(HttpMethod.GET, "/api/archives/**").hasAnyRole("ADMINISTRATEUR", "ENSEIGNANT", "ETUDIANT")
+                        .requestMatchers(HttpMethod.PUT, "/api/soutenances/**")
+                        .hasRole("ADMINISTRATEUR")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/soutenances/**")
+                        .hasRole("ADMINISTRATEUR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/soutenances/**")
+                        .hasAnyRole("ADMINISTRATEUR", "ENSEIGNANT", "ETUDIANT")
 
                         .anyRequest().authenticated()
                 )
